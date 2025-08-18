@@ -1,0 +1,23 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: memory_game_development
+  username: postgres
+  password: postgres
+  host: localhost
+
+test:
+  <<: *default
+  database: memory_game_test
+  username: postgres
+  password: postgres
+  host: localhost
+
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>

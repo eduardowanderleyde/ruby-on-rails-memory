@@ -33,3 +33,5 @@
 
 # Ignore cache
 /tmp/cache
+
+/config/credentials/production.key
