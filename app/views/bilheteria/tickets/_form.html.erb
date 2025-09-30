@@ -1,0 +1,64 @@
+<%= form_with(model: [:bilheteria, @ticket], local: true, class: 'needs-validation', novalidate: true) do |form| %>
+  <% if @ticket.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(@ticket.errors.count, "erro") %> impediram este ingresso de ser salvo:</h4>
+      <ul class="mb-0">
+        <% @ticket.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="mb-3">
+        <%= form.label :customer_name, "Nome do Cliente", class: 'form-label' %>
+        <%= form.text_field :customer_name, class: 'form-control', required: true %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :customer_email, "Email do Cliente", class: 'form-label' %>
+        <%= form.email_field :customer_email, class: 'form-control', required: true %>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :seat_number, "Número do Assento (opcional)", class: 'form-label' %>
+        <%= form.text_field :seat_number, class: 'form-control' %>
+        <div class="form-text">Deixe em branco se não houver numeração de assentos</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0">Informações do Evento</h6>
+        </div>
+        <div class="card-body">
+          <p><strong>Evento:</strong> <%= @event.name %></p>
+          <p><strong>Data:</strong> <%= @event.event_date.strftime('%d/%m/%Y às %H:%M') %></p>
+          <p><strong>Local:</strong> <%= @event.venue %></p>
+          <p><strong>Preço:</strong> <%= number_to_currency(@event.price) %></p>
+          <p><strong>Vagas:</strong> <%= @event.available_capacity %> / <%= @event.max_capacity %></p>
+        </div>
+      </div>
+
+      <% if @event.sold_out? %>
+        <div class="alert alert-warning mt-3">
+          <strong>Evento Esgotado!</strong><br>
+          Não é possível vender mais ingressos.
+        </div>
+      <% elsif !@event.can_sell_tickets? %>
+        <div class="alert alert-info mt-3">
+          <strong>Vendas Suspensas</strong><br>
+          Este evento não está disponível para venda.
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between">
+    <%= link_to 'Cancelar', bilheteria_event_tickets_path(@event), class: 'btn btn-secondary' %>
+    <%= form.submit 'Comprar Ingresso', class: 'btn btn-success', disabled: !@event.can_sell_tickets? %>
+  </div>
+<% end %>

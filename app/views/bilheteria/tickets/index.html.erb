@@ -1,0 +1,85 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Ingressos - <%= @event.name %></h1>
+    <div>
+      <%= link_to 'Vender Ingresso', new_bilheteria_event_ticket_path(@event), class: 'btn btn-success' %>
+      <%= link_to 'Voltar ao Evento', bilheteria_event_path(@event), class: 'btn btn-outline-primary' %>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <%= form_with url: bilheteria_event_tickets_path(@event), method: :get, local: true, class: 'd-flex' do |form| %>
+        <%= form.text_field :customer_email, placeholder: 'Buscar por email...', value: params[:customer_email], class: 'form-control me-2' %>
+        <%= form.submit 'Buscar', class: 'btn btn-outline-secondary' %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Lista de Ingressos -->
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Cliente</th>
+          <th>Email</th>
+          <th>Assento</th>
+          <th>Status</th>
+          <th>Preço Pago</th>
+          <th>Data da Compra</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @tickets.each do |ticket| %>
+          <tr>
+            <td><code><%= ticket.ticket_code %></code></td>
+            <td><%= ticket.customer_name %></td>
+            <td><%= ticket.customer_email %></td>
+            <td><%= ticket.seat_number || '-' %></td>
+            <td>
+              <span class="badge bg-<%= case ticket.status
+                when 'confirmed' then 'success'
+                when 'pending' then 'warning'
+                when 'cancelled' then 'danger'
+                when 'used' then 'info'
+                else 'secondary'
+              end %>">
+                <%= ticket.status.humanize %>
+              </span>
+            </td>
+            <td><%= number_to_currency(ticket.price_paid) %></td>
+            <td><%= ticket.purchase_date.strftime('%d/%m/%Y %H:%M') %></td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <%= link_to 'Ver', bilheteria_ticket_path(ticket), class: 'btn btn-outline-primary' %>
+                <%= link_to 'Editar', edit_bilheteria_ticket_path(ticket), class: 'btn btn-outline-secondary' %>
+                
+                <% if ticket.pending? %>
+                  <%= link_to 'Confirmar', confirm_bilheteria_ticket_path(ticket), method: :patch, class: 'btn btn-outline-success' %>
+                <% end %>
+                
+                <% if ticket.confirmed? && ticket.can_be_cancelled? %>
+                  <%= link_to 'Cancelar', cancel_bilheteria_ticket_path(ticket), method: :patch, class: 'btn btn-outline-danger' %>
+                <% end %>
+                
+                <% if ticket.confirmed? && ticket.can_be_used? %>
+                  <%= link_to 'Usar', use_bilheteria_ticket_path(ticket), method: :patch, class: 'btn btn-outline-info' %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @tickets.empty? %>
+    <div class="text-center py-5">
+      <h4 class="text-muted">Nenhum ingresso encontrado</h4>
+      <p class="text-muted">Venda o primeiro ingresso para este evento!</p>
+    </div>
+  <% end %>
+</div>

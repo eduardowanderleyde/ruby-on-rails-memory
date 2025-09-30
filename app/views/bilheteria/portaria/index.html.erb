@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV - Sistema de Bilheteria</title>
+  <%= csrf_meta_tags %>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-logo {
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-time {
+      background: rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .navbar-time .date {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .navbar-time .time {
+      font-size: 20px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+
+    .navbar-right {
+      display: flex;
+      gap: 15px;
+    }
+
+    .navbar-btn {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .navbar-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    /* MAIN CONTENT */
+    .main-container {
+      display: flex;
+      height: calc(100vh - 70px);
+      gap: 20px;
+      padding: 20px;
+    }
+
+    /* LEFT SIDE - SELEÇÃO */
+    .selection-panel {
+      flex: 1;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .ticket-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .ticket-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 25px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ticket-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .ticket-btn .icon {
+      font-size: 32px;
+    }
+
+    .ticket-btn .price {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .customer-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    /* RIGHT SIDE - CARRINHO/NOTA */
+    .cart-panel {
+      width: 400px;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .cart-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid #667eea;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-type {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .cart-item-details {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .cart-item-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .cart-item-remove {
+      background: #dc3545;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-left: 10px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-item-remove:hover {
+      background: #c82333;
+    }
+
+    .cart-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .cart-empty .icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .cart-summary {
+      border-top: 2px solid #e1e8ed;
+      padding-top: 20px;
+      margin-top: auto;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .cart-total-value {
+      color: #667eea;
+    }
+
+    .cart-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .stats-mini {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .stat-item {
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div class="navbar-logo">
+        <span>🎫</span>
+        <span>PDV Bilheteria</span>
+      </div>
+      <div class="navbar-time">
+        <div class="date" id="current-date">Carregando...</div>
+        <div class="time" id="current-time">00:00:00</div>
+      </div>
+    </div>
+    <div class="navbar-right">
+      <%= link_to "📊 Relatório do Dia", "#", class: "navbar-btn", onclick: "showDailyReport(); return false;" %>
+      <%= link_to "📋 Eventos", bilheteria_events_path, class: "navbar-btn" %>
+      <%= link_to "🚪 Sair", logout_path, method: :delete, class: "navbar-btn" %>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-container">
+    <!-- LEFT SIDE - SELEÇÃO -->
+    <div class="selection-panel">
+      <h2 class="section-title">Selecionar Tipo de Ingresso</h2>
+      
+      <!-- Banner Terça Grátis -->
+      <div id="tuesday-banner" style="display: none; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 18px;">
+        🎉 HOJE É TERÇA! ENTRADA GRATUITA! 🎉
+      </div>
+
+      <div class="ticket-types">
+        <button class="ticket-btn" onclick="addTicket('Inteira')">
+          <span class="icon">🎫</span>
+          <div>Inteira</div>
+          <div class="price" id="price-inteira">R$ 10,00</div>
+        </button>
+
+        <button class="ticket-btn" onclick="addTicket('Meia-Entrada')">
+          <span class="icon">🎓</span>
+          <div>Meia</div>
+          <div class="price" id="price-meia">R$ 5,00</div>
+        </button>
+
+        <button class="ticket-btn" onclick="addTicket('Idoso')">
+          <span class="icon">👴</span>
+          <div>Idoso</div>
+          <div class="price">Gratuito</div>
+        </button>
+
+        <button class="ticket-btn" onclick="addTicket('Criança')">
+          <span class="icon">👶</span>
+          <div>Criança</div>
+          <div class="price">Gratuito</div>
+        </button>
+
+        <button class="ticket-btn" onclick="addTicket('PCD')">
+          <span class="icon">♿</span>
+          <div>PCD</div>
+          <div class="price">Gratuito</div>
+        </button>
+      </div>
+
+      <div class="customer-info">
+        <h3 class="section-title">Dados do Cliente (Opcional)</h3>
+        
+        <div class="form-group">
+          <label for="customer-name">Nome Completo</label>
+          <input type="text" id="customer-name" placeholder="João da Silva">
+        </div>
+
+        <div class="form-group">
+          <label for="customer-cpf">CPF</label>
+          <input type="text" id="customer-cpf" placeholder="000.000.000-00">
+        </div>
+
+        <div class="form-group">
+          <label for="customer-email">Email</label>
+          <input type="email" id="customer-email" placeholder="joao@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="customer-phone">Telefone</label>
+          <input type="tel" id="customer-phone" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE - CARRINHO -->
+    <div class="cart-panel">
+      <div class="cart-header">
+        <h2 class="section-title" style="margin: 0; border: none;">Resumo da Venda</h2>
+      </div>
+
+      <div class="stats-mini">
+        <div class="stat-item">
+          <div class="stat-value" id="total-items">0</div>
+          <div class="stat-label">Ingressos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="daily-sales">0</div>
+          <div class="stat-label">Vendas Hoje</div>
+        </div>
+      </div>
+
+      <div class="cart-items" id="cart-items">
+        <div class="cart-empty">
+          <div class="icon">🛒</div>
+          <div>Nenhum ingresso selecionado</div>
+          <div style="font-size: 12px; margin-top: 5px;">Clique em um tipo de ingresso para adicionar</div>
+        </div>
+      </div>
+
+      <div class="cart-summary">
+        <div class="cart-total">
+          <span>Total:</span>
+          <span class="cart-total-value" id="cart-total">R$ 0,00</span>
+        </div>
+
+        <div class="cart-actions">
+          <button class="btn-secondary" onclick="clearCart()">Limpar</button>
+          <button class="btn-primary" onclick="finalizeSale()">💳 Finalizar Venda</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado do carrinho
+    let cart = [];
+    let dailySales = 0;
+    let isTuesday = false;
+
+    // Preços base
+    const PRICES = {
+      'Inteira': 10.00,
+      'Meia-Entrada': 5.00,
+      'Idoso': 0.00,
+      'Criança': 0.00,
+      'PCD': 0.00
+    };
+
+    // Verificar se é terça-feira
+    function checkTuesday() {
+      const now = new Date();
+      isTuesday = now.getDay() === 2; // 2 = terça-feira
+      
+      if (isTuesday) {
+        document.getElementById('tuesday-banner').style.display = 'block';
+        document.getElementById('price-inteira').textContent = 'GRÁTIS';
+        document.getElementById('price-meia').textContent = 'GRÁTIS';
+      }
+    }
+
+    // Atualizar relógio
+    function updateClock() {
+      const now = new Date();
+      
+      const dateOptions = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      const dateStr = now.toLocaleDateString('pt-BR', dateOptions);
+      document.getElementById('current-date').textContent = dateStr;
+
+      const timeStr = now.toLocaleTimeString('pt-BR');
+      document.getElementById('current-time').textContent = timeStr;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+    checkTuesday();
+
+    // Adicionar item ao carrinho
+    function addTicket(type) {
+      let price = PRICES[type] || 0;
+      
+      // Se for terça-feira, todos os ingressos são gratuitos
+      if (isTuesday) {
+        price = 0;
+      }
+      
+      const item = {
+        id: Date.now(),
+        type: type,
+        price: price,
+        timestamp: new Date().toLocaleTimeString('pt-BR'),
+        isFree: isTuesday && (type === 'Inteira' || type === 'Meia-Entrada')
+      };
+      
+      cart.push(item);
+      renderCart();
+      updateTotal();
+    }
+
+    // Remover item do carrinho
+    function removeTicket(id) {
+      cart = cart.filter(item => item.id !== id);
+      renderCart();
+      updateTotal();
+    }
+
+    // Renderizar carrinho
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="cart-empty">
+            <div class="icon">🛒</div>
+            <div>Nenhum ingresso selecionado</div>
+            <div style="font-size: 12px; margin-top: 5px;">Clique em um tipo de ingresso para adicionar</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = cart.map(item => {
+        const priceDisplay = item.price === 0 ? 'GRÁTIS' : `R$ ${item.price.toFixed(2)}`;
+        const freeTag = item.isFree ? '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px;">TERÇA GRÁTIS</span>' : '';
+        
+        return `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-type">${item.type} ${freeTag}</div>
+              <div class="cart-item-details">Adicionado às ${item.timestamp}</div>
+            </div>
+            <div class="cart-item-price">${priceDisplay}</div>
+            <button class="cart-item-remove" onclick="removeTicket(${item.id})">×</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Atualizar total
+    function updateTotal() {
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2)}`;
+      document.getElementById('total-items').textContent = cart.length;
+    }
+
+    // Limpar carrinho
+    function clearCart() {
+      if (cart.length === 0) return;
+      
+      if (confirm('Deseja limpar todos os ingressos do carrinho?')) {
+        cart = [];
+        renderCart();
+        updateTotal();
+      }
+    }
+
+    // Finalizar venda
+    function finalizeSale() {
+      if (cart.length === 0) {
+        alert('❌ Adicione pelo menos um ingresso para finalizar a venda!');
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      const customerName = document.getElementById('customer-name').value;
+      
+      let message = `🎫 CONFIRMAÇÃO DE VENDA\n\n`;
+      
+      if (isTuesday) {
+        message += `🎉 TERÇA-FEIRA GRÁTIS! 🎉\n\n`;
+      }
+      
+      message += `Total de ingressos: ${cart.length}\n`;
+      message += `Valor total: R$ ${total.toFixed(2)}\n\n`;
+      
+      if (customerName) {
+        message += `Cliente: ${customerName}\n\n`;
+      }
+      
+      message += `Detalhes:\n`;
+      cart.forEach((item, index) => {
+        const priceText = item.price === 0 ? 'GRÁTIS' : `R$ ${item.price.toFixed(2)}`;
+        const freeTag = item.isFree ? ' (TERÇA GRÁTIS)' : '';
+        message += `${index + 1}. ${item.type}${freeTag} - ${priceText}\n`;
+      });
+      message += `\nConfirmar venda?`;
+
+      if (confirm(message)) {
+        // Aqui você faria a requisição AJAX para salvar a venda
+        alert('✅ Venda finalizada com sucesso!\n\n📄 Ingressos enviados para impressão.');
+        
+        // Atualizar contadores
+        dailySales += cart.length;
+        document.getElementById('daily-sales').textContent = dailySales;
+        
+        // Limpar
+        cart = [];
+        renderCart();
+        updateTotal();
+        document.getElementById('customer-name').value = '';
+        document.getElementById('customer-cpf').value = '';
+        document.getElementById('customer-email').value = '';
+        document.getElementById('customer-phone').value = '';
+      }
+    }
+
+    // Relatório do dia
+    function showDailyReport() {
+      const report = `📊 RELATÓRIO DO DIA\n\n` +
+                    `Total de vendas: ${dailySales} ingressos\n` +
+                    `Horário: ${new Date().toLocaleTimeString('pt-BR')}\n\n` +
+                    `Em breve: relatório detalhado com gráficos e estatísticas!`;
+      alert(report);
+    }
+
+    // Inicializar
+    renderCart();
+    updateTotal();
+  </script>
+</body>
+</html>

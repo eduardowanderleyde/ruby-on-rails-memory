@@ -1,0 +1,86 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @event.name %></h1>
+    <div>
+      <%= link_to 'Editar', edit_bilheteria_event_path(@event), class: 'btn btn-outline-secondary' %>
+      <%= link_to 'Voltar', bilheteria_events_path, class: 'btn btn-outline-primary' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Detalhes do Evento</h5>
+          <p class="card-text">
+            <strong>Data e Hora:</strong> <%= @event.event_date.strftime('%d/%m/%Y às %H:%M') %><br>
+            <strong>Local:</strong> <%= @event.venue %><br>
+            <strong>Capacidade:</strong> <%= @event.available_capacity %> / <%= @event.max_capacity %><br>
+            <strong>Preço:</strong> <%= number_to_currency(@event.price) %><br>
+            <strong>Status:</strong> 
+            <span class="badge bg-<%= @event.status == 'published' ? 'success' : 'warning' %>">
+              <%= @event.status.humanize %>
+            </span>
+          </p>
+          
+          <% if @event.description.present? %>
+            <h6>Descrição:</h6>
+            <p><%= simple_format(@event.description) %></p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Estatísticas -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">Estatísticas</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="text-center">
+                <h4 class="text-primary"><%= @event.tickets_sold %></h4>
+                <p class="text-muted">Ingressos Vendidos</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <h4 class="text-success"><%= number_to_currency(@event.total_revenue) %></h4>
+                <p class="text-muted">Receita Total</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <h4 class="text-info"><%= @event.available_capacity %></h4>
+                <p class="text-muted">Vagas Disponíveis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Ações</h5>
+          <div class="d-grid gap-2">
+            <%= link_to 'Ver Ingressos', bilheteria_event_tickets_path(@event), class: 'btn btn-primary' %>
+            <%= link_to 'Vender Ingresso', new_bilheteria_event_ticket_path(@event), class: 'btn btn-success' %>
+            <%= link_to 'Editar Evento', edit_bilheteria_event_path(@event), class: 'btn btn-outline-secondary' %>
+          </div>
+        </div>
+      </div>
+
+      <% if @event.sold_out? %>
+        <div class="alert alert-warning mt-3">
+          <strong>Evento Esgotado!</strong><br>
+          Todos os ingressos foram vendidos.
+        </div>
+      <% elsif !@event.can_sell_tickets? %>
+        <div class="alert alert-info mt-3">
+          <strong>Vendas Suspensas</strong><br>
+          Este evento não está disponível para venda de ingressos no momento.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

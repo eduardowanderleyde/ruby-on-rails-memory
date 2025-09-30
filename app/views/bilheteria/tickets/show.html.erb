@@ -1,0 +1,110 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Ingresso #<%= @ticket.ticket_code %></h1>
+    <div>
+      <%= link_to 'Editar', edit_bilheteria_ticket_path(@ticket), class: 'btn btn-outline-secondary' %>
+      <%= link_to 'Voltar', bilheteria_event_tickets_path(@ticket.event), class: 'btn btn-outline-primary' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Detalhes do Ingresso</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Código:</strong> <code><%= @ticket.ticket_code %></code></p>
+              <p><strong>Cliente:</strong> <%= @ticket.customer_name %></p>
+              <p><strong>Email:</strong> <%= @ticket.customer_email %></p>
+              <p><strong>Assento:</strong> <%= @ticket.seat_number || 'Não especificado' %></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Status:</strong> 
+                <span class="badge bg-<%= case @ticket.status
+                  when 'confirmed' then 'success'
+                  when 'pending' then 'warning'
+                  when 'cancelled' then 'danger'
+                  when 'used' then 'info'
+                  else 'secondary'
+                end %>">
+                  <%= @ticket.status.humanize %>
+                </span>
+              </p>
+              <p><strong>Preço Pago:</strong> <%= number_to_currency(@ticket.price_paid) %></p>
+              <p><strong>Data da Compra:</strong> <%= @ticket.purchase_date.strftime('%d/%m/%Y às %H:%M') %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações do Evento -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">Evento</h5>
+          <p><strong>Nome:</strong> <%= @ticket.event.name %></p>
+          <p><strong>Data:</strong> <%= @ticket.event.event_date.strftime('%d/%m/%Y às %H:%M') %></p>
+          <p><strong>Local:</strong> <%= @ticket.event.venue %></p>
+          <% if @ticket.event.description.present? %>
+            <p><strong>Descrição:</strong> <%= simple_format(@ticket.event.description) %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Ações</h5>
+          <div class="d-grid gap-2">
+            <% if @ticket.pending? %>
+              <%= link_to 'Confirmar Ingresso', confirm_bilheteria_ticket_path(@ticket), 
+                  method: :patch, class: 'btn btn-success' %>
+            <% end %>
+            
+            <% if @ticket.confirmed? && @ticket.can_be_cancelled? %>
+              <%= link_to 'Cancelar Ingresso', cancel_bilheteria_ticket_path(@ticket), 
+                  method: :patch, class: 'btn btn-danger' %>
+            <% end %>
+            
+            <% if @ticket.confirmed? && @ticket.can_be_used? %>
+              <%= link_to 'Usar Ingresso', use_bilheteria_ticket_path(@ticket), 
+                  method: :patch, class: 'btn btn-info' %>
+            <% end %>
+            
+            <%= link_to 'Editar', edit_bilheteria_ticket_path(@ticket), class: 'btn btn-outline-secondary' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status do Ingresso -->
+      <div class="card mt-3">
+        <div class="card-body">
+          <h6 class="card-title">Status do Ingresso</h6>
+          <% case @ticket.status %>
+          <% when 'pending' %>
+            <div class="alert alert-warning">
+              <strong>Pendente de Confirmação</strong><br>
+              Este ingresso aguarda confirmação.
+            </div>
+          <% when 'confirmed' %>
+            <div class="alert alert-success">
+              <strong>Confirmado</strong><br>
+              Este ingresso está válido para o evento.
+            </div>
+          <% when 'cancelled' %>
+            <div class="alert alert-danger">
+              <strong>Cancelado</strong><br>
+              Este ingresso foi cancelado.
+            </div>
+          <% when 'used' %>
+            <div class="alert alert-info">
+              <strong>Utilizado</strong><br>
+              Este ingresso já foi usado no evento.
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

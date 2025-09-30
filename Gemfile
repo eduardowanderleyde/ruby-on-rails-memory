@@ -17,3 +17,5 @@ group :development do
 end
 
 gem "propshaft"
+
+gem "dotenv-rails", "~> 3.1", groups: [:development, :test]
