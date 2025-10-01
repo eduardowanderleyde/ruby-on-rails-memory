@@ -21,7 +21,7 @@ Rails.application.routes.draw do
       end
 
       # Portaria (tela e POST de venda)
-      get  "portaria",      to: "portaria#index"
+      get  "portaria", to: "portaria#index", as: :portaria
       post "portaria/sell", to: "portaria#sell", as: :portaria_sell
     end
   end

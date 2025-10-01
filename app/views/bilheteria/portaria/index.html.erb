@@ -376,7 +376,7 @@
     <div class="navbar-right">
       <%= link_to "📊 Relatório do Dia", "#", class: "navbar-btn", onclick: "showDailyReport(); return false;" %>
       <%= link_to "📋 Eventos", bilheteria_events_path, class: "navbar-btn" %>
-      <%= link_to "🚪 Sair", logout_path, method: :delete, class: "navbar-btn" %>
+      <%= button_to "🚪 Sair", logout_path, method: :delete, class: "navbar-btn", style: "border: none; cursor: pointer;" %>
     </div>
   </nav>
 
